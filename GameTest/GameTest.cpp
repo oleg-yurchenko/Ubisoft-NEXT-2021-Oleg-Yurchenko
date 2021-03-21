@@ -1,3 +1,150 @@
+#include "stdafx.h"
+#include <windows.h> 
+#include <math.h>
+#include "app\app.h"
+#include <iostream>
+#include <time.h>
+#include <vector>
+
+const int size = 16;
+
+/* GenerateMap(int map[size][size], std::vector<std::vector<int>> &q, int lim)
+	2d Map generation function
+	map: 2d array of size * size defined at start of program.
+	q: 2d vector array that is the path the enemies must take on the map
+	min: the minimum amount of moves that can be in q
+*/
+bool GenerateMap(int map[size][size], std::vector<std::vector<int>> &q, int min) {
+
+	// set random y position
+	int y = rand() % (size-2) + 1;
+	// set the 2nd move to x=1
+	int x = 1;
+	// Change pos at (0,y) and (1,y) to mark as visited
+	map[y][0] = 1;
+	map[y][x] = 1;
+	// add the positions from above to the q array
+	q.push_back({ y, 0 });
+	q.push_back({ y, x });
+
+	// loops used to keep track of length of path (mloops is max length of the path, or if the script gets stuck, max loop limit)
+	int loops = 0;
+	int mloops = 500;
+
+	// While loop to check if the x or y position is touching an edge
+	while ((x != size-1 && x != 0) && (y != size-1 && y != 0)) {
+		// Get a random next move. 4 options, one for each direction
+		int nextMove = rand() % 4;
+		// Switch statement to see where to move next
+		switch(nextMove) {
+		// Move x 1 right
+		case(0):
+			if (x - 1 >= 0 && map[y][x - 1] != 1)
+				x -= 1;
+			break;
+		// Move y 1 up
+		case(1):
+			if (y + 1 < size && map[y + 1][x] != 1)
+				y += 1;
+			break;
+		// Move x 1 left
+		case(2):
+			if (x + 1 < size && map[y][x + 1] != 1)
+				x += 1;
+			break;
+		// Move y 1 down
+		case(3):
+			if (y - 1 >= 0 && map[y - 1][x] != 1)
+				y -= 1;
+			break;
+		}
+		// Boolean to keep track whether the move is repeated or not.
+		bool isOrig = true;
+		for (int i = 0; i < q.size(); ++i) {
+			std::vector<int> currPos = { y, x };
+			if (currPos == q[i]) {
+				isOrig = false;
+				break;
+			}
+		}
+		// Add the move to the path and mark the map position as visited
+		q.push_back({ y, x });
+		map[y][x] = 1;
+		// If the amount of loops exceeds the maximum amount of loops, break out of for loop.
+		if (++loops > mloops)
+			break;
+	}
+	// If max length exceeded or the size of the path is too small (less than min) return false to signal failed map generation
+	if (loops > mloops || q.size() < min)
+		return false;
+	return true;
+}
+
+// Function that runs at start of round
+void StartRound(int round) {
+
+}
+
+
+// Initialize Towers vector
+
+// Initialize enemies vector
+
+// Init Map char array [int][int] and Queue Vector
+int map[size][size];
+std::vector<std::vector<int>> q;
+
+// Init Function
+void Init() {
+	/*Raul's Scuffed Console™*/
+	BOOL Monkey;
+	Monkey = AllocConsole();
+	if (Monkey && IsDebuggerPresent()) {
+		freopen("CONOUT$", "w", stdout);
+	}
+	/*---------------------*/
+
+	srand(time(NULL));
+	// Keep generating map until the function returns true. If it returns false then just keep clearing the map and q
+	while (!GenerateMap(map, q, 5/* 5 * rounds */)) {
+		q.clear();
+		for (int i = 0; i < size; ++i) {
+			for (int j = 0; j < size; ++j) {
+				map[i][j] = 0;
+			}
+		}
+	}
+	
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			std::cout << map[i][j] << "\t";
+		}
+		std::cout << std::endl;
+	}
+
+	for (auto i : q) {
+		std::cout << i[0] << " " << i[1] << std::endl;
+	}
+}
+
+// Runs every physics frame
+void Update(float dt) {
+
+}
+
+// Runs every frame (used for drawing)
+void Render() {
+
+
+}
+
+// Free memory
+void Shutdown() {
+
+
+}
+
+/*
 //------------------------------------------------------------------------
 // GameTest.cpp
 //------------------------------------------------------------------------
@@ -174,3 +321,4 @@ void Shutdown()
 	delete testSprite2;
 	//------------------------------------------------------------------------
 }
+*/
