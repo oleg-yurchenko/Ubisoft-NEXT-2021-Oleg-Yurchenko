@@ -23,6 +23,8 @@
     <ClCompile Include="App\TextureLoader.cpp">
       <Filter>API</Filter>
     </ClCompile>
+    <ClCompile Include="Path.cpp" />
+    <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\app.h">
@@ -52,6 +54,8 @@
     <ClInclude Include="App\TextureLoader.h">
       <Filter>API</Filter>
     </ClInclude>
+    <ClInclude Include="Path.h" />
+    <ClInclude Include="Turret.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

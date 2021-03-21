@@ -5,108 +5,84 @@
 #include <iostream>
 #include <time.h>
 #include <vector>
+#include "Path.h"
+#include "Turret.h"
 
-const int size = 16;
+// DEFAULT BOX SIZE = 128
 
-/* GenerateMap(int map[size][size], std::vector<std::vector<int>> &q, int lim)
+const int size = 48;
+
+/* GenerateMap(int map[size][size], std::vector<std::vector<int>> &path, int lim)
 	2d Map generation function
 	map: 2d array of size * size defined at start of program.
 	q: 2d vector array that is the path the enemies must take on the map
 	min: the minimum amount of moves that can be in q
 */
-bool GenerateMap(int map[size][size], std::vector<std::vector<int>> &q, int min) {
-
+bool GenerateMap(int map[size][size], std::vector<std::vector<int>>& path, int min) {
 	// set random y position
-	int y = rand() % (size-2) + 1;
-	// set the 2nd move to x=1
-	int x = 1;
-	// Change pos at (0,y) and (1,y) to mark as visited
-	map[y][0] = 1;
+	int y = rand() % size;
+	// set the initial x position
+	int x = 0;
+	// Find final position
+	int fx = 0;
+	int fy = 0;
+	int r = rand() % 3;
+	switch (r) {
+	case 0:
+		fx = rand() % size;
+		fy = 0;
+		break;
+	case 1:
+		fx = rand() % size;
+		fy = size-1;
+		break;
+	case 2:
+		fx = size-1;
+		fy = rand() % size;
+		break;
+	}
+	
 	map[y][x] = 1;
-	// add the positions from above to the q array
-	q.push_back({ y, 0 });
-	q.push_back({ y, x });
+	int border = false;
 
-	// loops used to keep track of length of path (mloops is max length of the path, or if the script gets stuck, max loop limit)
-	int loops = 0;
-	int mloops = 500;
-
-	// While loop to check if the x or y position is touching an edge
-	while ((x != size-1 && x != 0) && (y != size-1 && y != 0)) {
+	while (y != fy || x != fx) {
+		if (x == fx)
+			border = true;
+		else
+			border = false;
 		// Get a random next move. 4 options, one for each direction
-		int nextMove = rand() % 4;
-		// Switch statement to see where to move next
-		switch(nextMove) {
-		// Move x 1 right
-		case(0):
-			if (x - 1 >= 0 && map[y][x - 1] != 1)
-				x -= 1;
-			break;
-		// Move y 1 up
-		case(1):
-			if (y + 1 < size && map[y + 1][x] != 1)
-				y += 1;
-			break;
-		// Move x 1 left
-		case(2):
-			if (x + 1 < size && map[y][x + 1] != 1)
+		int nextMove = rand() % 3;
+		switch (nextMove) {
+		case 0:
+			if (x < fx && map[y][x + 1] != 1)
 				x += 1;
 			break;
-		// Move y 1 down
-		case(3):
-			if (y - 1 >= 0 && map[y - 1][x] != 1)
+		case 1:
+			if (!border && y + 1 <= (size - 1) && map[y + 1][x] != 1)
+				y += 1;
+			else if (border && y < fy && y + 1 <= (size - 1) && map[y + 1][x] != 1)
+				y += 1;
+			break;
+		case 2:
+			if (!border && y - 1 >= 0 && map[y - 1][x] != 1)
+				y -= 1;
+			else if (border && y > fy && y - 1 >= 0 && map[y - 1][x] != 1)
 				y -= 1;
 			break;
 		}
-		// Boolean to keep track whether the move is repeated or not.
-		bool isOrig = true;
-		for (int i = 0; i < q.size(); ++i) {
-			std::vector<int> currPos = { y, x };
-			if (currPos == q[i]) {
-				isOrig = false;
-				break;
-			}
+		if (map[y][x] != 1) {
+			map[y][x] = 1;
+			path.push_back({ y,x });
 		}
-		// Add the move to the path and mark the map position as visited
-		q.push_back({ y, x });
-		map[y][x] = 1;
-		// If the amount of loops exceeds the maximum amount of loops, break out of for loop.
-		if (++loops > mloops)
-			break;
 	}
-	// If max length exceeded or the size of the path is too small (less than min) return false to signal failed map generation
-	if (loops > mloops || q.size() < min)
+	if (path.size() < min)
 		return false;
 	return true;
 }
 
 // Function that runs at start of round
-void StartRound(int round) {
-
-}
-
-
-// Initialize Towers vector
-
-// Initialize enemies vector
-
-// Init Map char array [int][int] and Queue Vector
-int map[size][size];
-std::vector<std::vector<int>> q;
-
-// Init Function
-void Init() {
-	/*Raul's Scuffed Console™*/
-	BOOL Monkey;
-	Monkey = AllocConsole();
-	if (Monkey && IsDebuggerPresent()) {
-		freopen("CONOUT$", "w", stdout);
-	}
-	/*---------------------*/
-
-	srand(time(NULL));
-	// Keep generating map until the function returns true. If it returns false then just keep clearing the map and q
-	while (!GenerateMap(map, q, 5/* 5 * rounds */)) {
+void StartRound(int round, int map[size][size], std::vector<std::vector<int>>& q) {
+	while (!GenerateMap(map, q, 5 * (round / 3))) {
 		q.clear();
 		for (int i = 0; i < size; ++i) {
 			for (int j = 0; j < size; ++j) {
@@ -114,34 +90,208 @@ void Init() {
 			}
 		}
 	}
+}
+
+// Function to handle selection of towers
+int Selector() {
+	float x;
+	float y;
+	App::GetMousePos(x, y);
+	if (x > 768 && y > 325) {
+		if (y < 425)
+			return 3;
+		else if (y < 525)
+			return 2;
+		else if (y < 625)
+			return 1;
+		else if (y < 725)
+			return 0;
+		else
+			return 4;
+	}
+	return 5;
+}
+
+// Round counter
+int cRound;
+bool roundDone;
+bool roundStart;
+
+// Initialize Towers vector
+std::vector<Turret*> turrets;
+
+// PlaceHolder Turrets (of each type)
+CSimpleSprite* green;
+CSimpleSprite* blue;
+CSimpleSprite* red;
+CSimpleSprite* purple;
+
+// Initialize enemies vector
+
+
+// Init Map char array [int][int] and Queue Vector
+int map[size][size];
+std::vector<std::vector<int>> q;
+std::vector<Path*> paths;
+
+// Init Function
+void Init() {
+
+	/*Raul's Scuffed Console™*/
+	BOOL Monkey;
+	Monkey = AllocConsole();
+	if (Monkey && IsDebuggerPresent()) {
+		freopen("CONOUT$", "w", stdout);
+	}
+	/*-----------------------*/
+
+	// Init placeholder sprites
+	green = App::CreateSprite(".\\res\\green.bmp", 1, 1);
+	green->SetPosition(950, 675);
+	green->SetScale(0.5f);
+	blue = App::CreateSprite(".\\res\\blue.bmp", 1, 1);
+	blue->SetPosition(950, 575);
+	blue->SetScale(0.5f);
+	red = App::CreateSprite(".\\res\\red.bmp", 1, 1);
+	red->SetPosition(950, 475);
+	red->SetScale(0.5f);
+	purple = App::CreateSprite(".\\res\\purple.bmp", 1, 1);
+	purple->SetPosition(950, 375);
+	purple->SetScale(0.5f);
+
+	cRound = 1;
+	roundDone = false;
+	roundStart = false;
+	turrets.push_back(new Turret(".\\res\\green.bmp", 0));
+
+	srand(time(NULL));
+	StartRound(cRound, map, q);
 	
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			std::cout << map[i][j] << "\t";
+			if (map[i][j] == 1)
+				paths.push_back(new Path(".\\res\\enemypath.bmp", 1));
+			else
+				paths.push_back(new Path(".\\res\\path.bmp", 0));
+			paths.back()->SetPosition(j * 16 + 8, i * 16 + 8);
 		}
-		std::cout << std::endl;
 	}
-
+	/*
 	for (auto i : q) {
 		std::cout << i[0] << " " << i[1] << std::endl;
 	}
+	*/
 }
 
 // Runs every physics frame
 void Update(float dt) {
-
+	if (!roundDone && !roundStart) {
+		// POLL KEY PRESSES AND CHECK IF THEY ARE AVAILABLE. IF THEY ARE ENTER PLACEMENT MODE
+		if (App::IsKeyPressed(VK_LBUTTON)) {
+			int chosen = Selector();
+		}
+		int turrCount = 0;
+		for (auto i : turrets)
+			turrCount += i->IsPlaced();
+		if (turrCount == turrets.size())
+			roundStart = true;
+		for (auto i : paths)
+			i->Update(dt);
+	}
+	else if (!roundDone && roundStart) {
+		for (auto i : turrets)
+			i->Update(dt);
+		for (auto i : paths)
+			i->Update(dt);
+	}
+	else {
+		StartRound(++cRound, map, q);
+		if (cRound % 16 == 0)
+			turrets.push_back(new Turret(".\\res\\purple.bmp", 3));
+		else if (cRound % 8 == 0)
+			turrets.push_back(new Turret(".\\res\\red.bmp", 2));
+		else if (cRound % 4 == 0)
+			turrets.push_back(new Turret(".\\res\\blue.bmp", 1));
+		else if (cRound % 2 == 0)
+			turrets.push_back(new Turret(".\\res\\green.bmp", 0));
+		for (auto i : paths)
+			i->Update(dt);
+		roundDone = false;
+		roundStart = false;
+	}
 }
 
 // Runs every frame (used for drawing)
 void Render() {
+	
+	int gCount = 0;
+	int bCount = 0;
+	int rCount = 0;
+	int pCount = 0;
 
+	for (auto i : turrets) {
+		switch (i->GetType()) {
+		case 0:
+			gCount += 1;
+			break;
+		case 1:
+			bCount += 1;
+			break;
+		case 2:
+			rCount += 1;
+			break;
+		case 3:
+			pCount += 1;
+			break;
+		}
+	}
 
+	char cg[4];
+	char bg[4];
+	char rg[4];
+	char pg[4];
+
+	_itoa(gCount, cg, 10);
+	_itoa(bCount, bg, 10);
+	_itoa(rCount, rg, 10);
+	_itoa(pCount, pg, 10);
+
+	App::Print(800, 700, "Greens:", 0, 255, 0);
+	App::Print(800, 650, cg, 0, 255, 0);
+	green->Draw();
+	App::Print(800, 600, "Blues:", 0, 0, 255);
+	App::Print(800, 550, bg, 0, 0, 255);
+	blue->Draw();
+	App::Print(800, 500, "Reds:", 255, 0, 0);
+	App::Print(800, 450, rg, 255, 0, 0);
+	red->Draw();
+	App::Print(800, 400, "Purples:", 0.8f, 0.01f, 0.8f);
+	App::Print(800, 350, pg, 0.8f, 0.01f, 0.8f);
+	purple->Draw();
+
+	if (!turrets.empty()) {
+		for (auto i : turrets)
+			i->Render();
+	}
+	for (auto i : paths)
+		i->Render();
 }
 
 // Free memory
 void Shutdown() {
-
-
+	for (auto i : paths) {
+		i->ShutDown();
+		delete i;
+	}
+	if (!turrets.empty()) {
+		for (auto i : turrets) {
+			i->ShutDown();
+			delete i;
+		}
+	}
+	paths.clear();
+	turrets.clear();
+	q.clear();
 }
 
 /*
