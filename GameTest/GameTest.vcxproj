@@ -183,6 +183,7 @@
     <ClInclude Include="App\SimpleSound.h" />
     <ClInclude Include="App\SimpleSprite.h" />
     <ClInclude Include="App\TextureLoader.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Path.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="App\SimpleSound.cpp" />
     <ClCompile Include="App\SimpleSprite.cpp" />
     <ClCompile Include="App\TextureLoader.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameTest.cpp" />
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="stdafx.cpp">

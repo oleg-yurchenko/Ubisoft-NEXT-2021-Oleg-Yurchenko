@@ -25,6 +25,7 @@
     </ClCompile>
     <ClCompile Include="Path.cpp" />
     <ClCompile Include="Turret.cpp" />
+    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App\app.h">
@@ -56,6 +57,7 @@
     </ClInclude>
     <ClInclude Include="Path.h" />
     <ClInclude Include="Turret.h" />
+    <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
