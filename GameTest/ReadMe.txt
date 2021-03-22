@@ -1,3 +1,17 @@
+Game Instructions:
+You have 100 hp, as shown in the top right, along with the rounds.
+The round only starts once all turrets are placed.
+Your turret count for each type of turret is also indicated on the right. Click the turret in that Pane to select it, then choose a spot on the map to place it down.
+Once all turrets are placed, the enemies will start to follow the cyan path. The turrets will automatically target the futhest enemy, so play around this however you'd like.
+You get a certain amount of turrets every round, and a new turret and ghost spawn every few rounds. Try to figure out when that happens!
+Each turret and ghost have their own stats, currently still in the process of being balanced.
+If a ghost reaches the end of the path, they will damage you, taking away some of your HP.
+Your HP carries on from level to level.
+Once all ghosts are killed or have attacked you, you will move on to the next level.
+If you run out of health, a game over screen will be shown.
+To play again, click R.
+
+ORIGINAL CONTENTS:
 ========================================================================
     CONSOLE APPLICATION : GameTest Project Overview
 ========================================================================
